@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <packaging>jar</packaging>
+
+    <groupId>com.kuaishou.dp</groupId>
+    <artifactId>kwai-search-unicode-normalizer-udf</artifactId>
+    <version>1.1-SNAPSHOT</version>
+    <parent>
+        <artifactId>kuaishou-offline-root-pom</artifactId>
+        <groupId>kuaishou</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.hive</groupId>
+            <artifactId>hive-exec</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>jdk.tools</groupId>
+                    <artifactId>jdk.tools</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>LATEST</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.5</version>
+            <scope>test</scope>
+       </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <configuration>
+                    <!-- put your configurations here -->
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <shadedArtifactAttached>false</shadedArtifactAttached>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                            <relocations>
+                                <!-- 将com下org下进行全量shade  -->
+                                <relocation>
+                                    <pattern>com.</pattern>
+                                    <!-- ！！！注意shade路径不能重复和被模仿，如果有人参考，可将owesomeudf改成自己项目的名称！！！  -->
+                                    <shadedPattern>kuaishou.shade.unicodenormalizer.com.</shadedPattern>
+                                    <!-- 将udf包路径下进行排除，注意没找到通配符，为防止新建包，进行冗余  -->
+                                    <!-- 找到通配符  -->
+
+                                <excludes>
+                                    <exclude>com.kwai.unicodenormalizer.**</exclude>
+                                </excludes>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.</pattern>
+                                    <!-- ！！！注意shade路径不能重复和被模仿，如果有人参考，可将owesomeudf改成自己项目的名称！！！  -->
+                                    <shadedPattern>kuaishou.shade.unicodenormalizer.org.</shadedPattern>
+                                    <excludes>
+                                        <!-- 将hadoop和hive依赖排除，因为hive包是provided的，不能将hive包shade -->
+                                        <!-- 找到通配符  -->
+                                        <exclude>org.apache.hadoop.**</exclude>
+                                        <exclude>org.geotools.**</exclude>
+                                        <exclude>org.opengis.**</exclude>
+                                        <exclude>org.jdom.**</exclude>
+                                    </excludes>
+                                </relocation>
+                            </relocations>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
+
